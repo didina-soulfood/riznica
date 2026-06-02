@@ -10,14 +10,7 @@
     <div class="recipe-container">
         <header class="header">
             <h1>Didina SoulFood Riznica</h1>
-            <div class="controls">
-                <div class="language-selector">
-                    <img src="https://flagsapi.com/RS/flat/24.png" alt="Serbian Flag" title="Srpski" class="active" data-lang="sr">
-                    <img src="https://flagsapi.com/GB/flat/24.png" alt="English Flag" title="English" data-lang="en">
-                    <img src="https://flagsapi.com/DE/flat/24.png" alt="German Flag" title="Deutsch" data-lang="de">
-                </div>
-                <button id="darkModeToggle">Dark Mode</button>
-            </div>
+            <!-- Removed language selector and dark mode toggle controls -->
         </header>
 
         <h2>Svi Recepti</h2>
@@ -267,31 +260,10 @@
 
         <footer class="energy-footer">
             <p><strong>💫 Energija jela:</strong> Pronađite inspiraciju za svaki dan!</p>
-            <div class="social-links">
-                <a href="https://www.instagram.com/didinasoulfoodriznica" target="_blank">Instagram</a>
-                <a href="mailto:gags.stom@gmail.com">Contact</a>
-            </div>
+            <!-- Removed social links as per user request -->
         </footer>
     </div>
 
-    <script>
-        const darkModeToggle = document.getElementById('darkModeToggle');
-        const body = document.body;
-
-        darkModeToggle.addEventListener('click', () => {
-            body.classList.toggle('dark-mode');
-            // Optionally, save user preference to localStorage
-            if (body.classList.contains('dark-mode')) {
-                localStorage.setItem('darkMode', 'enabled');
-            } else {
-                localStorage.setItem('darkMode', 'disabled');
-            }
-        });
-
-        // Check for dark mode preference on load
-        if (localStorage.getItem('darkMode') === 'enabled') {
-            body.classList.add('dark-mode');
-        }
-    </script>
+    <!-- Removed dark mode JavaScript as per user request -->
 </body>
 </html>
