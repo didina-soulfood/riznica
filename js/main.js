@@ -30,6 +30,8 @@ function setLanguage(lang) {
 
   if (typeof renderFilterButtons === 'function') renderFilterButtons();
   if (typeof renderRecipes === 'function') renderRecipes();
+  if (typeof renderFeaturedGrid === 'function') renderFeaturedGrid();
+  if (typeof renderCategoriesGrid === 'function') renderCategoriesGrid();
 }
 
 // ---- CATEGORY INFO ----
@@ -308,6 +310,43 @@ function renderRecipes() {
   });
 }
 
+// ---- HOMEPAGE GRIDS ----
+function renderFeaturedGrid() {
+  const grid = document.getElementById('featuredGrid');
+  if (!grid) return;
+  grid.innerHTML = recipes.slice(0, 6).map(r => createRecipeCardHTML(r)).join('');
+  grid.querySelectorAll('.recipe-card').forEach(card => {
+    card.addEventListener('click', function(e) {
+      if (!e.target.classList.contains('fav-toggle')) openModal(this.dataset.recipeNumber);
+    });
+  });
+  grid.querySelectorAll('.fav-toggle').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      const num = this.dataset.recipeFav;
+      toggleFavorite(num);
+      this.textContent = isFavorite(num) ? '❤️' : '🤍';
+      renderFavoritesPanel();
+    });
+  });
+}
+
+function renderCategoriesGrid() {
+  const catGrid = document.getElementById('categoriesGrid');
+  if (!catGrid) return;
+  const cats = [...new Set(recipes.map(r => r.category))];
+  const classMap = { morning: 'cat-card-morning', refreshing: 'cat-card-refreshing', coffee: 'cat-card-coffee', dunno: 'cat-card-dunno', oven: 'cat-card-oven' };
+  catGrid.innerHTML = cats.map(cat => {
+    const info = getCategoryInfo(cat);
+    const count = recipes.filter(r => r.category === cat).length;
+    return `<a href="recipes.html" class="category-card ${classMap[info.cls] || ''}" data-filter="${cat}">
+      <div class="category-card-emoji">${info.emoji}</div>
+      <div class="category-card-name">${t(info.label_key)}</div>
+      <div class="category-card-count">${count} ${t('results_count')}</div>
+    </a>`;
+  }).join('');
+}
+
 // ---- INIT ----
 document.addEventListener('DOMContentLoaded', function () {
   // Language switcher
@@ -353,6 +392,10 @@ document.addEventListener('DOMContentLoaded', function () {
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') { closeModal(); closeFavoritesPanel(); }
   });
+
+  // Homepage grids
+  if (document.getElementById('featuredGrid')) renderFeaturedGrid();
+  if (document.getElementById('categoriesGrid')) renderCategoriesGrid();
 
   // Recipes page
   if (document.getElementById('recipeGrid')) {
