@@ -77,7 +77,7 @@ const translations = {
     nav_contact: 'Kontakt',
     nav_favorites: 'Favoriten',
 
-    hero_title: 'Didinas SoulFood-Schatzkammer',
+    hero_title: "Didi's SoulFood-Schatzkammer",
     hero_subtitle: 'Echte Rezepte mit Seele — für alle, die Essen wollen, das von Herzen kommt.',
     hero_cta: 'Rezepte entdecken',
     hero_scroll: 'Mehr entdecken',
