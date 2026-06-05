@@ -73,7 +73,16 @@ CSS
 Footer
 Collapse
 
-
+File	Purpose
+index.html	Home page — hero, 6 featured recipes, categories grid
+recipes.html	All 16 recipes — live search + 5 category filters
+about.html	About Didina — story + values
+contact.html	Contact form
+css/style.css	Coral/teal design system
+css/responsive.css	Mobile-first breakpoints
+js/translations.js	SR/DE/EN translations
+js/recipes-data.js	16 recipes from didina-recipes.json
+js/main.js	Language switch, search, modal, favorites
 
 
 
