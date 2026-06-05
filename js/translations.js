@@ -7,7 +7,7 @@ const translations = {
     nav_favorites: 'Omiljeni',
 
     hero_title: 'Didina SoulFood Riznica',
-    hero_subtitle: 'Jednostavni recepti s dušom — za ljude koji vole hranu koja ih voli nazad.',
+    hero_subtitle: 'Jednostavni recepti s dušom — za ljude koji vole hranu koja ih voli za uzvrat.',
     hero_cta: 'Istraži recepte',
     hero_scroll: 'Otkrij više',
 
