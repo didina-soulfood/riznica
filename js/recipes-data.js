@@ -1087,7 +1087,7 @@ const recipes = [
   },
   {
     number: "26",
-    title: { sr: "Kremast ovseni kaš sa bananom", de: "Cremiger Haferbrei mit Banane", en: "Creamy Banana Oat Porridge" },
+    title: { sr: "Kremasta ovsena kaša sa bananom", de: "Cremiger Haferbrei mit Banane", en: "Creamy Banana Oat Porridge" },
     subtitle: {
       sr: "Topao, sitan i pun energije — savršen start koji se pravi za 5 minuta.",
       de: "Warm, sättigend und voller Energie — ein perfekter Start in 5 Minuten.",
@@ -1168,7 +1168,7 @@ const recipes = [
   },
   {
     number: "29",
-    title: { sr: "Lubenica salata sa fetom i nanaom", de: "Wassermelonensalat mit Feta und Minze", en: "Watermelon Salad with Feta & Mint" },
+    title: { sr: "Lubenica salata sa fetom i nanom", de: "Wassermelonensalat mit Feta und Minze", en: "Watermelon Salad with Feta & Mint" },
     subtitle: {
       sr: "Letnja kombinacija koja zvuči čudno a deluje kao da je uvek ovako trebalo biti.",
       de: "Eine Sommerkombination, die seltsam klingt, aber sich anfühlt, als wäre sie schon immer so gewesen.",
