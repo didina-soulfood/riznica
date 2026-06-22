@@ -61,7 +61,17 @@
 <!-- CONTACT FORM -->
 <main class="section">
   <div class="contact-wrapper">
-    <form class="contact-form" id="contactForm" novalidate>
+    <form
+      class="contact-form"
+      id="contactForm"
+      action="https://formsubmit.co/d.stamenkovic@yahoo.com"
+      method="POST"
+    >
+      <!-- FormSubmit config: no captcha, redirect back to same page, subject label -->
+      <input type="hidden" name="_captcha" value="false">
+      <input type="hidden" name="_subject" value="Poruka sa Didina SoulFood sajta">
+      <input type="hidden" name="_next" value="https://natasha0824inkf.github.io/didina-soulfood-riznica/contact.html?sent=1">
+      <input type="text" name="_honey" style="display:none">
 
       <div class="form-group">
         <label class="form-label" for="contactName" data-i18n="contact_name">Vaše ime</label>
@@ -136,6 +146,7 @@
       <a href="blog.html"    data-i18n="nav_blog">Blog</a>
       <a href="about.html"   data-i18n="nav_about">O meni</a>
       <a href="contact.html" data-i18n="nav_contact">Kontakt</a>
+      <a href="privacy.html" data-i18n="nav_privacy">Privatnost</a>
     </nav>
     <div class="footer-social">
       <a href="https://www.instagram.com/didinasoulfoodriznica" target="_blank" rel="noopener" class="footer-social-link">

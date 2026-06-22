@@ -86,8 +86,18 @@
     <div class="newsletter-section">
       <h3 data-i18n="newsletter_title">Ostanite u toku</h3>
       <p data-i18n="newsletter_desc">Novi recepti, sezonske ideje i vesti — direktno u inbox.</p>
-      <form class="newsletter-form" id="newsletterForm">
-        <input type="email" class="newsletter-input" data-i18n-placeholder="newsletter_placeholder" placeholder="Vaša email adresa" required>
+      <form class="newsletter-form" id="newsletterForm"
+            action="https://eb92a696.sibforms.com/serve/MUIFAGXu94i9D2QQ5jR-Qjcvk4MVfoaoygqavVBzCMRGrN1Sqe7NfbIPwDa6KX-HvH9jy64xAz7p64oKqjLAlu5ovxohrv1cCenYD87ufhIxVWDrsSMSn0PX7lXCXqE3oVmXvrT_IcNHjbF0oym_rbLPWKLBYOM3co8CvXkrEFKQng_N7F0YDfx6w3V8X10mFSnl43spb4FARf40Ow=="
+            method="POST"
+            data-type="subscription">
+        <input type="email" class="newsletter-input" name="EMAIL"
+               data-i18n-placeholder="newsletter_placeholder" placeholder="Vaša email adresa" required>
+        <input type="text" name="email_address_check" value="" style="display:none">
+        <input type="hidden" name="locale" value="sr">
+        <label class="newsletter-gdpr">
+          <input type="checkbox" name="CAPTCHA" value="1" required>
+          <span data-i18n="newsletter_gdpr">Slažem se da primam newsletter i prihvatam politiku privatnosti.</span>
+        </label>
         <button type="submit" class="newsletter-btn" data-i18n="newsletter_btn">Prijavi se</button>
       </form>
     </div>
@@ -116,6 +126,7 @@
       <a href="blog.html"    data-i18n="nav_blog">Blog</a>
       <a href="about.html"   data-i18n="nav_about">O meni</a>
       <a href="contact.html" data-i18n="nav_contact">Kontakt</a>
+      <a href="privacy.html" data-i18n="nav_privacy">Privatnost</a>
     </nav>
     <div class="footer-social">
       <a href="https://www.instagram.com/didinasoulfoodriznica" target="_blank" rel="noopener" class="footer-social-link">
