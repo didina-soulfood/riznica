@@ -37,12 +37,13 @@ jobs:
           if git diff --cached --quiet; then
             echo "No Notion changes to commit"
           else
-            git pull --rebase origin main
             git commit -m "chore: sync blog posts from Notion"
+            git pull --rebase origin main
             git push origin main
           fi
 
       - name: Push to production
+        if: always()
         env:
           PROD_GITHUB_TOKEN: ${{ secrets.PROD_GITHUB_TOKEN }}
         run: |
