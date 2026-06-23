@@ -55,5 +55,5 @@ jobs:
           git config --unset-all http.https://github.com/.extraheader || true
           git remote add production https://x-access-token:${PROD_GITHUB_TOKEN}@github.com/didina-soulfood/riznica.git
           git fetch origin main
-          git push production origin/main:main
+          git push production origin/main:main --force
           echo "Pushed to production"
