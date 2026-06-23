@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blog – Didina SoulFood Riznica</title>
+  <meta name="description" content="Priče iz kuhinje — o hrani, vremenu i onome što nas hrani iznutra.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css?v=2">
+  <link rel="stylesheet" href="css/responsive.css?v=fe0ed2f6426f41c36c5665c9e0d61a9e30c893bb">
+  <script>if(localStorage.getItem('didina-theme')==='dark'||(!localStorage.getItem('didina-theme')&&window.matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.classList.add('dark-mode');</script>
+  <style>.site-header{background:#6B4F3A;border-bottom:2px solid #D8A14A;position:sticky;top:0;z-index:100}.nav-links a{color:rgba(247,241,231,.72);border-bottom:2px solid transparent}.nav-links a.active{color:#D8A14A;border-bottom-color:#D8A14A;font-weight:600}html.dark-mode .site-header{background:#1A1208}</style>
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="nav-container">
+    <a href="index.html" class="nav-logo" aria-label="Didina SoulFood Riznica">
+      <img src="assets/images/logo.svg?v=fe0ed2f6426f41c36c5665c9e0d61a9e30c893bb" alt="" class="nav-logo-img" aria-hidden="true">
+      <span class="nav-logo-main">Didina SoulFood Riznica</span>
+    </a>
+    <button class="hamburger" id="hamburger" aria-label="Meni" aria-expanded="false">
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+    </button>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="index.html"   data-i18n="nav_home">Početna</a></li>
+      <li><a href="recipes.html" data-i18n="nav_recipes">Recepti</a></li>
+      <li><a href="blog.html"    class="active" data-i18n="nav_blog">Blog</a></li>
+      <li><a href="about.html"   data-i18n="nav_about">O meni</a></li>
+      <li><a href="contact.html" data-i18n="nav_contact">Kontakt</a></li>
+    </ul>
+    <div class="nav-right">
+      <div class="lang-switcher">
+        <button class="lang-btn active" data-lang="sr">SR</button>
+        <button class="lang-btn"        data-lang="de">DE</button>
+        <button class="lang-btn"        data-lang="en">EN</button>
+      </div>
+      <button class="theme-toggle" aria-label="Toggle theme">🌙</button>
+      <button class="favorites-btn">
+        🤍 <span class="favorites-btn-label" data-i18n="nav_favorites">Omiljeni</span>
+        <span class="fav-count">0</span>
+      </button>
+    </div>
+  </nav>
+</header>
+
+<section class="page-hero page-hero-blog">
+  <h1 data-i18n="blog_title">Blog</h1>
+  <p data-i18n="blog_subtitle">Priče iz kuhinje</p>
+</section>
+
+<main class="section">
+  <div class="container">
+    <!-- BLOG_GRID_START -->
+    <div class="blog-grid">
+
+      <!-- Post 1 -->
+      <article class="blog-card">
+        <div class="blog-card-body">
+          <div class="blog-card-tag" data-lang-content="sr">organizacija · svakodnevica</div>
+          <div class="blog-card-tag" data-lang-content="de" hidden>Organisation · Alltag</div>
+          <div class="blog-card-tag" data-lang-content="en" hidden>organisation · everyday life</div>
+
+          <h2 class="blog-card-title">
+            <span data-lang-content="sr">Zašto ne kuvam? Pitanje koje sam postavljala i samoj sebi</span>
+            <span data-lang-content="de" hidden>Warum koche ich nicht? Eine Frage, die ich mir selbst stellen musste</span>
+            <span data-lang-content="en" hidden>Why Don’t I Cook? The Question I Had to Ask Myself</span>
+          </h2>
+
+          <p class="blog-card-excerpt">
+            <span data-lang-content="sr">Svi imamo izgovor. Nemam vremena. Umorna sam. Ne znam šta da kuvam. Sve je u organizaciji — i motivacija dođe sama po sebi.</span>
+            <span data-lang-content="de" hidden>Wir alle haben unsere Ausrede. Keine Zeit. Zu müde. Keine Idee. Aber was, wenn die Lösung einfacher ist, als wir denken?</span>
+            <span data-lang-content="en" hidden>We all have an excuse. No time. Too tired. No idea what to cook. But what if the answer is simpler than we think?</span>
+          </p>
+
+          <div class="blog-card-meta">
+            <span class="blog-card-date">
+              <span data-lang-content="sr">22. jun 2026</span>
+              <span data-lang-content="de" hidden>Juni 2026</span>
+              <span data-lang-content="en" hidden>June 2026</span>
+            </span>
+            <a href="blog/kako-naci-vremena.html" class="blog-read-more" data-i18n="blog_read_more">Čitaj dalje</a>
+          </div>
+        </div>
+      </article>
+
+    </div>
+    <!-- BLOG_GRID_END -->
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="footer-content">
+    <div class="footer-logo">Didina SoulFood Riznica</div>
+    <p class="footer-tagline" data-i18n="footer_text">Napravljeno s ljubavlju za sve koji veruju da je hrana jezik duše.</p>
+    <div class="footer-divider"></div>
+    <nav class="footer-nav">
+      <a href="index.html"   data-i18n="nav_home">Početna</a>
+      <a href="recipes.html" data-i18n="nav_recipes">Recepti</a>
+      <a href="blog.html"    data-i18n="nav_blog">Blog</a>
+      <a href="about.html"   data-i18n="nav_about">O meni</a>
+      <a href="contact.html" data-i18n="nav_contact">Kontakt</a>
+      <a href="privacy.html" data-i18n="nav_privacy">Privatnost</a>
+    </nav>
+    <div class="footer-social">
+      <a href="https://www.instagram.com/didinasoulfoodriznica" target="_blank" rel="noopener" class="footer-social-link">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+        @didinasoulfoodriznica
+      </a>
+    </div>
+    <p class="footer-copy">© 2026 Dragana Stamenković – Didi · Didina SoulFood Riznica. <span data-i18n="footer_rights">Sva prava zadržana.</span></p>
+  </div>
+</footer>
+
+<aside class="favorites-panel" id="favoritesPanel">
+  <div class="favorites-panel-header">
+    <span class="favorites-panel-title" data-i18n="favorites_title">Moji omiljeni recepti</span>
+    <button class="close-favorites-btn" id="closeFavPanel">×</button>
+  </div>
+  <div class="favorites-list" id="favoritesList"></div>
+</aside>
+
+<div class="modal-overlay" id="modalOverlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modal" tabindex="-1">
+    <div class="modal-header">
+      <button class="modal-close" id="closeModal" aria-label="Zatvori">×</button>
+      <div class="modal-category-badge" id="modalCategory"></div>
+      <h2 class="modal-title" id="modalTitle"></h2>
+      <p class="modal-subtitle" id="modalSubtitle"></p>
+    </div>
+    <div id="modalHeroImage" class="modal-hero-image" hidden></div>
+    <div class="modal-body">
+      <div class="modal-meta-item" id="modalTime"></div>
+      <blockquote class="modal-comment" id="modalComment" hidden></blockquote>
+      <h3 class="modal-section-title" data-i18n="ingredients">Sastojci</h3>
+      <ul class="ingredients-list" id="modalIngredients"></ul>
+      <h3 class="modal-section-title" data-i18n="instructions">Priprema</h3>
+      <ol class="instructions-list" id="modalInstructions"></ol>
+      <div class="modal-actions">
+        <button class="modal-fav-btn" id="modalFavBtn">🤍 <span data-i18n="add_favorite">Dodaj u omiljene</span></button>
+        <button class="modal-share-btn" id="modalShareBtn">↗ <span data-i18n="share_recipe">Podeli recept</span></button>
+      </div>
+      <div class="modal-nav">
+        <button class="modal-nav-btn" id="modalPrevBtn">← <span data-i18n="prev_recipe">Prethodni</span></button>
+        <button class="modal-nav-btn" id="modalNextBtn"><span data-i18n="next_recipe">Sledeći</span> →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="js/translations.js?v=2"></script>
+<script src="js/recipes-data.js?v=fe0ed2f6426f41c36c5665c9e0d61a9e30c893bb"></script>
+<script src="js/main.js?v=2"></script>
+</body>
+</html>
