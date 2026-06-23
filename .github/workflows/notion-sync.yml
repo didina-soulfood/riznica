@@ -1,9 +1,7 @@
 name: Sync from Notion
 
 on:
-  schedule:
-    - cron: '0 * * * *'   # every hour
-  workflow_dispatch:        # manual trigger
+  workflow_dispatch:        # manual trigger only — schedule disabled
 
 permissions:
   contents: write
