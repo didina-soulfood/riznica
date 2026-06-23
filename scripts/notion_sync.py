@@ -1,11 +1,19 @@
 #!/usr/bin/env python3
-"""Syncs Published posts from Notion database to blog HTML files."""
+"""Syncs Published posts from Notion database to blog HTML files.
+
+Two authoring modes:
+  Legacy (3-row):  Row has Language select set to SR/DE/EN → grouped by slug (old behaviour)
+  New (1-row):     Row has no Language select → single page per post, language content
+                   lives inside toggle blocks labelled 🇷🇸 / 🇩🇪 / 🇬🇧 (or SR/DE/EN)
+"""
 
 import os
 import re
 import sys
 import html
 import json
+import hashlib
+import unicodedata
 import requests
 from datetime import datetime
 from pathlib import Path
@@ -13,6 +21,7 @@ from pathlib import Path
 NOTION_TOKEN = re.sub(r'\s', '', os.environ["NOTION_TOKEN"])
 NOTION_DB_ID = re.sub(r'\s', '', os.environ["NOTION_DB_ID"])
 REPO_ROOT = Path(__file__).parent.parent
+TRANSLATION_CACHE = REPO_ROOT / "scripts" / "translation_cache.json"
 
 HEADERS = {
     "Authorization": f"Bearer {NOTION_TOKEN}",
@@ -23,6 +32,25 @@ HEADERS = {
 SR_MONTHS = ["jan","feb","mar","apr","maj","jun","jul","avg","sep","okt","nov","dec"]
 DE_MONTHS = ["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"]
 EN_MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"]
+
+_SR_TRANSLIT = str.maketrans("šŠčČćĆđĐžŽ", "sScCcCdDzZ")
+
+def slugify(text):
+    """Turn any title into a URL-safe slug (Serbian-aware)."""
+    text = text.translate(_SR_TRANSLIT)
+    text = unicodedata.normalize("NFKD", text).encode("ascii", "ignore").decode()
+    text = text.lower()
+    text = re.sub(r"[^\w\s-]", "", text)
+    text = re.sub(r"[\s_]+", "-", text).strip("-")
+    return re.sub(r"-+", "-", text)[:60]
+
+
+# Patterns to detect language toggle headings like "🇷🇸 Srpski", "DE", "[EN]", etc.
+LANG_TOGGLE_RE = {
+    "SR": re.compile(r"🇷🇸|[Ss]rpsk|[Ss]erbian|\bSR\b|\[SR\]", re.IGNORECASE),
+    "DE": re.compile(r"🇩🇪|[Dd]eutsch|[Gg]erman|\bDE\b|\[DE\]",  re.IGNORECASE),
+    "EN": re.compile(r"🇬🇧|[Ee]nglish|\bEN\b|\[EN\]",              re.IGNORECASE),
+}
 
 
 def format_date(date_str, lang):
@@ -76,8 +104,32 @@ def rich_text_to_html(rich_texts):
     return out
 
 
-def blocks_to_html(blocks):
+def download_image(url, slug, idx):
+    """Download a Notion image to assets/images/blog/ and return the relative src path."""
+    img_dir = REPO_ROOT / "assets" / "images" / "blog"
+    img_dir.mkdir(parents=True, exist_ok=True)
+    ext = ".jpg"
+    for candidate in (".png", ".gif", ".webp", ".jpeg"):
+        if candidate in url.lower().split("?")[0]:
+            ext = candidate
+            break
+    filename = f"{slug}-{idx}{ext}"
+    dest = img_dir / filename
+    if not dest.exists():
+        try:
+            res = requests.get(url, timeout=20)
+            res.raise_for_status()
+            dest.write_bytes(res.content)
+            print(f"  Downloaded image → assets/images/blog/{filename}")
+        except Exception as e:
+            print(f"  Warning: could not download image: {e}", file=sys.stderr)
+            return None
+    return f"../assets/images/blog/{filename}"
+
+
+def blocks_to_html(blocks, slug="post"):
     out = ""
+    img_counter = [0]
     i = 0
     while i < len(blocks):
         block = blocks[i]
@@ -127,6 +179,46 @@ def blocks_to_html(blocks):
             text = rich_text_to_html(content.get("rich_text", []))
             out += f"        <p><em>{text}</em></p>\n"
 
+        elif btype == "image":
+            src = (content.get("file", {}).get("url")
+                   or content.get("external", {}).get("url", ""))
+            caption_parts = content.get("caption", [])
+            caption = rich_text_to_html(caption_parts) if caption_parts else ""
+            if src:
+                local = download_image(src, slug, img_counter[0])
+                img_counter[0] += 1
+                display_src = local if local else html.escape(src)
+                alt = html.escape(re.sub(r"<[^>]+>", "", caption))
+                out += f'        <figure class="blog-figure">\n'
+                out += f'          <img src="{display_src}" alt="{alt}" class="blog-img" loading="lazy">\n'
+                if caption:
+                    out += f'          <figcaption>{caption}</figcaption>\n'
+                out += f'        </figure>\n'
+
+        elif btype in ("embed", "video", "bookmark"):
+            url = (content.get("url", "")
+                   or content.get("external", {}).get("url", "")
+                   or content.get("file", {}).get("url", ""))
+            if url:
+                yt = re.search(r"(?:youtube\.com/watch\?v=|youtu\.be/)([\w-]+)", url)
+                spotify = re.search(r"open\.spotify\.com/(track|album|playlist|episode)/([\w]+)", url)
+                if yt:
+                    vid = yt.group(1)
+                    out += (f'        <div class="blog-embed">\n'
+                            f'          <iframe src="https://www.youtube.com/embed/{vid}" '
+                            f'frameborder="0" allowfullscreen loading="lazy" '
+                            f'title="YouTube video"></iframe>\n'
+                            f'        </div>\n')
+                elif spotify:
+                    kind, sid = spotify.group(1), spotify.group(2)
+                    out += (f'        <div class="blog-embed blog-embed--spotify">\n'
+                            f'          <iframe src="https://open.spotify.com/embed/{kind}/{sid}" '
+                            f'frameborder="0" allowtransparency="true" allow="encrypted-media" '
+                            f'loading="lazy" title="Spotify"></iframe>\n'
+                            f'        </div>\n')
+                else:
+                    out += f'        <p><a href="{html.escape(url)}">{html.escape(url)}</a></p>\n'
+
         i += 1
     return out
 
@@ -144,6 +236,166 @@ def get_page_blocks(page_id):
         else:
             url = None
     return blocks
+
+
+def find_language_sections(all_blocks, slug):
+    """
+    Scan top-level blocks for toggle blocks whose label matches a language pattern.
+    Fetches toggle children and converts to HTML per language.
+
+    If no language toggles are found, all content is treated as SR.
+    Non-toggle blocks that sit outside any language toggle are prepended to SR.
+
+    Returns: {'SR': html_str, 'DE': html_str, 'EN': html_str}
+    """
+    lang_blocks = {"SR": [], "DE": [], "EN": []}
+    extra_sr_blocks = []
+    found_any_toggle = False
+
+    for block in all_blocks:
+        if block["type"] == "toggle":
+            toggle_text = "".join(
+                rt["plain_text"]
+                for rt in block.get("toggle", {}).get("rich_text", [])
+            )
+            matched = None
+            for lang, pattern in LANG_TOGGLE_RE.items():
+                if pattern.search(toggle_text):
+                    matched = lang
+                    break
+            if matched:
+                found_any_toggle = True
+                children = get_page_blocks(block["id"])
+                lang_blocks[matched].extend(children)
+                continue
+        extra_sr_blocks.append(block)
+
+    if not found_any_toggle:
+        return {
+            "SR": blocks_to_html(all_blocks, slug),
+            "DE": "",
+            "EN": "",
+        }
+
+    sr_blocks = extra_sr_blocks + lang_blocks["SR"]
+    return {
+        "SR": blocks_to_html(sr_blocks, slug)                 if sr_blocks              else "",
+        "DE": blocks_to_html(lang_blocks["DE"], slug + "-de") if lang_blocks["DE"]      else "",
+        "EN": blocks_to_html(lang_blocks["EN"], slug + "-en") if lang_blocks["EN"]      else "",
+    }
+
+
+def ensure_db_properties():
+    """Add Title DE and Title EN text properties to the DB if they don't exist yet."""
+    db_url = f"https://api.notion.com/v1/databases/{NOTION_DB_ID}"
+    res = requests.get(db_url, headers=HEADERS)
+    if not res.ok:
+        print(f"  Warning: could not read DB schema: {res.status_code}", file=sys.stderr)
+        return
+    existing = res.json().get("properties", {})
+    to_add = {}
+    if "Title DE" not in existing:
+        to_add["Title DE"] = {"rich_text": {}}
+    if "Title EN" not in existing:
+        to_add["Title EN"] = {"rich_text": {}}
+    if to_add:
+        patch = requests.patch(db_url, headers=HEADERS, json={"properties": to_add})
+        if patch.ok:
+            print(f"  Added missing DB properties: {', '.join(to_add)}")
+        else:
+            print(f"  Warning: could not add properties: {patch.status_code} {patch.text}", file=sys.stderr)
+
+
+def load_cache():
+    if TRANSLATION_CACHE.exists():
+        return json.loads(TRANSLATION_CACHE.read_text())
+    return {}
+
+
+def save_cache(cache):
+    TRANSLATION_CACHE.write_text(json.dumps(cache, ensure_ascii=False, indent=2))
+
+
+def _sr_hash(text):
+    return hashlib.md5(text.encode()).hexdigest()[:12]
+
+
+def _mymemory_call(text, target_lang):
+    """Single MyMemory API call. Returns original text on failure."""
+    try:
+        res = requests.get(
+            "https://api.mymemory.translated.net/get",
+            params={"q": text, "langpair": f"sr|{target_lang}", "de": "nevenaneks@gmail.com"},
+            timeout=20,
+        )
+        if not res.ok:
+            return text
+        data = res.json()
+        if data.get("responseStatus") == 200:
+            return data["responseData"]["translatedText"]
+        return text
+    except Exception as e:
+        print(f"  Warning: MyMemory error: {e}", file=sys.stderr)
+        return text
+
+
+def mymemory_translate(text, target_lang):
+    """Translate SR text to target_lang via MyMemory (free, no key needed). Chunks long text."""
+    if not text or not text.strip():
+        return ""
+    MAX = 1500
+    if len(text) <= MAX:
+        return _mymemory_call(text, target_lang)
+    parts = re.split(r'(?<=[.!?])\s+', text)
+    chunks, current = [], ""
+    for part in parts:
+        if len(current) + len(part) + 1 > MAX and current:
+            chunks.append(current.strip())
+            current = part
+        else:
+            current = (current + " " + part).strip()
+    if current:
+        chunks.append(current)
+    return " ".join(_mymemory_call(c, target_lang) for c in chunks)
+
+
+def translate_html_body(html_str, target_lang):
+    """Translate visible text inside HTML block elements, preserving structure."""
+    if not html_str:
+        return ""
+    pattern = re.compile(r'([ \t]*)<(p|h[1-3]|li|blockquote)>(.*?)</\2>\n', re.DOTALL)
+
+    def replace(m):
+        indent, tag, inner = m.group(1), m.group(2), m.group(3)
+        plain = html.unescape(re.sub(r'<[^>]+>', '', inner)).strip()
+        if not plain:
+            return m.group(0)
+        translated = mymemory_translate(plain, target_lang)
+        return f'{indent}<{tag}>{html.escape(translated)}</{tag}>\n'
+
+    return pattern.sub(replace, html_str)
+
+
+def auto_translate(slug, sr_title, sr_body, cache):
+    """
+    Return (de_title, de_body, en_title, en_body) from cache or via MyMemory.
+    Only translates when SR content has changed since last sync.
+    """
+    h = _sr_hash(sr_title + sr_body)
+    entry = cache.get(slug, {})
+
+    if entry.get("hash") == h:
+        return entry.get("de_title",""), entry.get("de_body",""), entry.get("en_title",""), entry.get("en_body","")
+
+    print(f"  Translating {slug} via MyMemory...")
+    de_title = mymemory_translate(sr_title, "de")
+    en_title = mymemory_translate(sr_title, "en")
+    de_body  = translate_html_body(sr_body, "de") if sr_body else ""
+    en_body  = translate_html_body(sr_body, "en") if sr_body else ""
+
+    cache[slug] = {"hash": h, "de_title": de_title, "de_body": de_body, "en_title": en_title, "en_body": en_body}
+    save_cache(cache)
+    return de_title, de_body, en_title, en_body
 
 
 def query_database():
@@ -193,12 +445,11 @@ def render_post(slug, versions):
     en_date  = format_date(date_raw, "EN")
 
     sr_body  = v(sr, "body")
-    de_body  = v(de, "body")
-    en_body  = v(en, "body")
+    de_body  = v(de, "body", sr_body)
+    en_body  = v(en, "body", sr_body)
 
     meta_desc = first_paragraph(sr_body)
 
-    # Escape values used in HTML attributes and JSON-LD
     sr_title_h  = html.escape(sr_title)
     de_title_h  = html.escape(de_title)
     en_title_h  = html.escape(en_title)
@@ -398,8 +649,8 @@ def render_card(slug, versions, date_raw):
     en_tags    = en.get("tags", sr_tags)
 
     sr_excerpt = first_paragraph(sr.get("body", ""))
-    de_excerpt = first_paragraph(de.get("body", ""))
-    en_excerpt = first_paragraph(en.get("body", ""))
+    de_excerpt = first_paragraph(de.get("body", "") or sr.get("body", ""))
+    en_excerpt = first_paragraph(en.get("body", "") or sr.get("body", ""))
 
     sr_date    = format_date(date_raw, "SR")
     de_date    = format_date(date_raw, "DE")
@@ -458,29 +709,70 @@ def update_blog_listing(cards_html):
 
 
 def main():
+    ensure_db_properties()
     print("Querying Notion database...")
     pages = query_database()
     print(f"Found {len(pages)} published entries")
 
-    # Group by slug
-    posts = {}
+    posts = {}   # slug → {versions, date}  — new single-row mode
+    legacy = {}  # slug → {versions, date}  — old 3-row mode (Language select set)
+    trans_cache = load_cache()
+
     for page in pages:
-        slug = get_prop(page, "Slug", "text")
-        lang = get_prop(page, "Language", "select").upper()
-        if not slug or lang not in ("SR", "DE", "EN"):
-            print(f"  Skipping page {page['id']}: missing slug or invalid language")
+        sr_title_raw = get_prop(page, "Title", "title")
+        slug = get_prop(page, "Slug", "text") or slugify(sr_title_raw)
+        if not slug:
+            print(f"  Skipping page {page['id']}: no title or slug")
             continue
 
-        if slug not in posts:
-            posts[slug] = {"versions": {}, "date": get_prop(page, "Date", "date")}
+        lang = get_prop(page, "Language", "select").upper()
 
-        blocks = get_page_blocks(page["id"])
-        posts[slug]["versions"][lang] = {
-            "title": get_prop(page, "Title", "title"),
-            "tags":  get_prop(page, "Tags", "multi_select"),
-            "date":  get_prop(page, "Date", "date"),
-            "body":  blocks_to_html(blocks),
-        }
+        if lang in ("SR", "DE", "EN"):
+            # ── Legacy mode: one row per language, grouped by slug ────────────
+            if slug not in legacy:
+                legacy[slug] = {"versions": {}, "date": get_prop(page, "Date", "date")}
+            blocks = get_page_blocks(page["id"])
+            legacy[slug]["versions"][lang] = {
+                "title": sr_title_raw,
+                "tags":  get_prop(page, "Tags", "multi_select"),
+                "date":  get_prop(page, "Date", "date"),
+                "body":  blocks_to_html(blocks, slug),
+            }
+            print(f"  [legacy] {slug} / {lang}")
+
+        else:
+            # ── New mode: single row, language content in toggle blocks ───────
+            # Minimum required: just a title. Everything else is optional.
+            sr_title = sr_title_raw
+            de_title = get_prop(page, "Title DE", "text") or sr_title
+            en_title = get_prop(page, "Title EN", "text") or sr_title
+            tags     = get_prop(page, "Tags", "multi_select")
+            # Date falls back to page creation time if not set
+            date_raw = get_prop(page, "Date", "date") or page.get("created_time", "")[:10]
+
+            all_blocks = get_page_blocks(page["id"])
+            bodies = find_language_sections(all_blocks, slug)
+
+            # Auto-translate SR → DE/EN when manual translations are missing
+            at_de_title, at_de_body, at_en_title, at_en_body = auto_translate(
+                slug, sr_title, bodies["SR"], trans_cache
+            )
+            de_title = get_prop(page, "Title DE", "text") or at_de_title or sr_title
+            en_title = get_prop(page, "Title EN", "text") or at_en_title or sr_title
+
+            posts[slug] = {
+                "versions": {
+                    "SR": {"title": sr_title, "tags": tags, "date": date_raw, "body": bodies["SR"]},
+                    "DE": {"title": de_title, "tags": tags, "date": date_raw, "body": bodies["DE"] or at_de_body},
+                    "EN": {"title": en_title, "tags": tags, "date": date_raw, "body": bodies["EN"] or at_en_body},
+                },
+                "date": date_raw,
+            }
+            print(f"  [new]    {slug}")
+
+    # Legacy posts take precedence when slug exists in both modes
+    for slug, data in legacy.items():
+        posts[slug] = data
 
     if not posts:
         print("No valid posts to sync.")
@@ -489,7 +781,6 @@ def main():
     # Sort by date descending (newest first)
     sorted_posts = sorted(posts.items(), key=lambda x: x[1]["date"] or "", reverse=True)
 
-    # Generate post HTML files
     blog_dir = REPO_ROOT / "blog"
     blog_dir.mkdir(exist_ok=True)
     cards = []
@@ -505,7 +796,6 @@ def main():
 
         cards.append(render_card(slug, versions, date_raw))
 
-    # Update blog.html listing
     cards_html = "\n".join(cards)
     update_blog_listing(cards_html)
     print("  Updated: blog.html")
