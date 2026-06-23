@@ -51,6 +51,8 @@ jobs:
             echo "PROD_GITHUB_TOKEN not set, skipping"
             exit 0
           fi
+          # Remove the checkout action's credential helper so our PAT takes effect
+          git config --unset-all http.https://github.com/.extraheader || true
           git remote add production https://x-access-token:${PROD_GITHUB_TOKEN}@github.com/didina-soulfood/riznica.git
           git fetch origin main
           git push production origin/main:main
