@@ -15,6 +15,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
 
       - uses: actions/setup-python@v5
         with:
@@ -53,6 +54,13 @@ jobs:
           fi
           # Remove the checkout action's credential helper so our PAT takes effect
           git config --unset-all http.https://github.com/.extraheader || true
+          # Delete the production main branch first to clear any corrupted state
+          curl -s -X DELETE \
+            -H "Authorization: Bearer ${PROD_GITHUB_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            https://api.github.com/repos/didina-soulfood/riznica/git/refs/heads/main || true
+          # Give GitHub a moment to process the deletion
+          sleep 2
           git remote add production https://x-access-token:${PROD_GITHUB_TOKEN}@github.com/didina-soulfood/riznica.git
           git push production HEAD:main --force --no-thin
           echo "Pushed to production"
