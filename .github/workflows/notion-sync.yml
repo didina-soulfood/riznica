@@ -54,5 +54,5 @@ jobs:
           # Remove the checkout action's credential helper so our PAT takes effect
           git config --unset-all http.https://github.com/.extraheader || true
           git remote add production https://x-access-token:${PROD_GITHUB_TOKEN}@github.com/didina-soulfood/riznica.git
-          git push production HEAD:main --force
+          git push production HEAD:main --force --no-thin
           echo "Pushed to production"
